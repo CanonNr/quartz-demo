@@ -5,6 +5,7 @@ import com.example.quartz.QuartzService;
 import com.example.quartz.entity.Task;
 import com.example.quartz.jobs.FirstJob;
 import lombok.extern.slf4j.Slf4j;
+import org.quartz.DateBuilder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,6 +15,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
+
+import static org.quartz.DateBuilder.futureDate;
 
 @Slf4j
 @RestController
@@ -55,7 +58,8 @@ public class TestController {
         map.put("status","OK");
         Task task = new Task("abcd","create","ubuntu");
         map.put("body", JSON.toJSON(task));
-        Date date = new Date(System.currentTimeMillis() + 10*1000);
+//        Date date = new Date(System.currentTimeMillis() + 10*1000);
+        Date date = futureDate(100, DateBuilder.IntervalUnit.SECOND);
         quartzService.addJob(FirstJob.class, "abcd", "test", date, map);
         log.info("create job... {}",date);
         return "ok";
@@ -70,9 +74,11 @@ public class TestController {
     }
 
     @GetMapping("/test3/a")
-    public String test3a(){
+    public String test3a() throws InterruptedException {
         quartzService.runAJobNow("abcd", "test");
-        quartzService.deleteJob("abcd", "test");
+//        quartzService.pauseJob("abcd", "test");
+//        Thread.sleep(150);
+        //quartzService.deleteJob("abcd", "test");
         log.info("run abcd");
         return "ok";
     }
